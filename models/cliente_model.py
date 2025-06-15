@@ -1,18 +1,17 @@
 from . import db
 
+
 class Cliente(db.Model):
-    __tablename__ = 'cliente'
-    
+    __tablename__ = "cliente"
+
     idcliente = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    nome = db.Column('nome', db.String(60), nullable=False)
-    _endereco = db.Column('endereco', db.String(80), nullable=True)
-    _cidade = db.Column('cidade', db.String(80), nullable=True)
-    _uf = db.Column('uf', db.String(2), nullable=True)
-    _cep = db.Column('cep', db.String(9), nullable=True)
+    nome = db.Column("nome", db.String(60), nullable=False)
+    _endereco = db.Column("endereco", db.String(80), nullable=True)
+    _cidade = db.Column("cidade", db.String(80), nullable=True)
+    _uf = db.Column("uf", db.String(2), nullable=True)
+    _cep = db.Column("cep", db.String(9), nullable=True)
 
-
-    
     @property
     def endereco(self):
         return self._endereco
@@ -46,13 +45,11 @@ class Cliente(db.Model):
         self._cep = value
 
     def to_dict(self):
-        """Converte o objeto Cliente para um dicionário, usando as propriedades."""
         return {
-            'idcliente': self.idcliente,
-            'nome': self.nome,
-            'endereco': self.endereco,
-            'cidade': self.cidade,
-            'uf': self.uf,
-            'cep': self.cep
+            "idcliente": self.idcliente,
+            "nome": self.nome,
+            "endereco": self.endereco,
+            "cidade": self.cidade,
+            "uf": self.uf,
+            "cep": self.cep,
         }
-

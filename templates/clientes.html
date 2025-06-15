@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestão de Clientes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html{
+        height: 100%;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .transition-all-fast {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+      }
+      /* modal */
+      .modal-enter-active,
+      .modal-exit-active {
+        transition: opacity 200ms ease-out, transform 200ms ease-out;
+      }
+      .modal-enter-from,
+      .modal-exit-to {
+        opacity: 0;
+        transform: translateY(1rem) scale(0.95);
+      }
+      .modal-enter-to,
+      .modal-exit-from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      /* Tabela com linhas "flutuantes" */
+      #clientTable tbody tr {
+        border-bottom: 8px solid transparent;
+      }
+      #clientTable tbody tr:last-child {
+        border-bottom: 0;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-100 bg-gradient-to-br from-blue-50 via-gray-50 to-purple-50"
+  >
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
+      >
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
+            Clientes
+          </h1>
+          <p class="mt-1 text-base text-gray-500">
+            Central de gerenciamento de clientes.
+          </p>
+        </div>
+        <button
+          onclick="openModal('add')"
+          class="mt-4 sm:mt-0 flex items-center bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg hover:shadow-blue-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:-translate-y-0.5 transition-all-fast"
+        >
+          <i class="fa-solid fa-plus me-3"></i>
+          Adicionar Cliente
+        </button>
+      </div>
+
+      <!-- Alertas -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="fixed top-5 right-5 z-50 space-y-3">
+        {% for category, message in messages %}
+        <div
+          class="alert-message bg-{{ 'green' if category == 'success' else 'red' }}-500 text-white font-bold rounded-lg px-4 py-3 shadow-lg flex items-center"
+          role="alert"
+        >
+          <p>{{ message }}</p>
+          <button
+            onclick="this.parentElement.remove()"
+            class="ml-4 text-xl font-semibold"
+          >
+            &times;
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <!-- Card de Vidro -->
+      <div class="glass-card rounded-xl shadow-lg">
+        <!-- Header do Card com a Barra de Pesquisa -->
+        <div class="p-5 border-b border-white/20">
+          <div class="relative">
+            <div
+              class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+            >
+              <svg
+                class="h-5 w-5 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="searchInput"
+              onkeyup="searchTable()"
+              placeholder="Pesquisar clientes..."
+              class="block w-full pl-11 pr-4 py-2.5 border border-gray-300/50 rounded-lg leading-5 bg-white/70 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all-fast"
+            />
+          </div>
+        </div>
+
+        <!-- Tabela de Clientes -->
+        <div class="overflow-x-auto p-2">
+          <table
+            id="clientTable"
+            class="w-full min-w-full border-separate"
+            style="border-spacing: 0"
+          >
+            <thead class="bg-transparent">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                >
+                  Nome
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                >
+                  Localização
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider"
+                >
+                  Endereço
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider"
+                >
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-transparent">
+              {% for cliente in clientes %}
+              <tr
+                class="bg-white rounded-lg shadow-sm hover:shadow-md hover:bg-blue-50/30 transform hover:-translate-y-0.5 transition-all-fast"
+              >
+                <td
+                  class="px-6 py-5 whitespace-nowrap text-sm text-gray-800 font-semibold rounded-l-lg"
+                >
+                  {{ cliente.nome }}
+                </td>
+                <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
+                  {{ cliente.cidade or 'Não informada' }}, {{ cliente.uf or '--'
+                  }}
+                </td>
+                <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-500">
+                  {{ cliente.endereco or 'Não informado' }}
+                </td>
+                <td
+                  class="px-6 py-5 whitespace-nowrap text-center text-sm font-medium rounded-r-lg"
+                >
+                  <div class="flex justify-center items-center space-x-5">
+                    <button
+                      onclick="openModal('edit', {{ cliente.idcliente }})"
+                      class="text-gray-400 hover:text-blue-600 transition-all-fast"
+                      title="Editar"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path
+                          d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"
+                        ></path>
+                        <path d="m15 5 4 4"></path>
+                      </svg>
+                    </button>
+                    <a
+                      href="{{ url_for('cliente_bp.excluir_cliente', id=cliente.idcliente) }}"
+                      onclick="return confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')"
+                      class="text-gray-400 hover:text-red-600 transition-all-fast"
+                      title="Excluir"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+              <tr id="no-results" class="hidden">
+                <td
+                  colspan="4"
+                  class="px-6 py-12 text-center text-sm text-gray-600"
+                >
+                  Nenhum resultado encontrado para sua busca.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          {% if not clientes %}
+          <div class="p-12 text-center text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="mx-auto h-16 w-16 text-gray-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a3 3 0 01-5.714 0M12 12a3 3 0 100-6 3 3 0 000 6z"
+              />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-800">
+              Sua lista de clientes está vazia
+            </h3>
+            <p class="mt-1 text-base text-gray-500">
+              Clique no botão "Adicionar Cliente" para começar a cadastrar.
+            </p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Cliente (mantido) -->
+    <div
+      id="client-modal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 hidden z-40"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl w-full max-w-2xl transform transition-all modal-enter-from z-50"
+      >
+        <div
+          class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
+        >
+          <h3 id="modal-title" class="text-lg font-semibold text-gray-900"></h3>
+          <button
+            onclick="closeModal()"
+            class="text-gray-400 hover:text-gray-600 transition-all"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="client-form" method="POST">
+          <div class="p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              <div class="sm:col-span-2">
+                <label
+                  for="nome"
+                  class="block text-sm font-medium text-gray-700"
+                  >Nome Completo</label
+                ><input
+                  type="text"
+                  name="nome"
+                  id="nome"
+                  required
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <label
+                  for="endereco"
+                  class="block text-sm font-medium text-gray-700"
+                  >Endereço</label
+                ><input
+                  type="text"
+                  name="endereco"
+                  id="endereco"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label
+                  for="cidade"
+                  class="block text-sm font-medium text-gray-700"
+                  >Cidade</label
+                ><input
+                  type="text"
+                  name="cidade"
+                  id="cidade"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label for="uf" class="block text-sm font-medium text-gray-700"
+                  >UF</label
+                ><input
+                  type="text"
+                  name="uf"
+                  id="uf"
+                  maxlength="2"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <label for="cep" class="block text-sm font-medium text-gray-700"
+                  >CEP</label
+                ><input
+                  type="text"
+                  name="cep"
+                  id="cep"
+                  placeholder="00000-000"
+                  maxlength="9"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-gray-50 px-6 py-4 flex justify-end space-x-3 rounded-b-lg"
+          >
+            <button
+              type="button"
+              onclick="closeModal()"
+              class="bg-white py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all-fast"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              id="modal-submit-button"
+              class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-all-fast"
+            >
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // O JavaScript continua o mesmo, sem necessidade de alterações.
+      const modal = document.getElementById("client-modal");
+      const modalContent = modal.querySelector("div");
+      const modalTitle = document.getElementById("modal-title");
+      const form = document.getElementById("client-form");
+
+      function searchTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById("clientTable");
+        const tbody = table.querySelector("tbody");
+        const tr = tbody.getElementsByTagName("tr");
+        let found = false;
+
+        for (let i = 0; i < tr.length; i++) {
+          let row = tr[i];
+          if (row.id === "no-results") continue;
+
+          const cells = row.getElementsByTagName("td");
+          let rowText = "";
+          for (let j = 0; j < cells.length - 1; j++) {
+            // Pula Ações
+            rowText += cells[j].textContent || cells[j].innerText;
+          }
+
+          if (rowText.toUpperCase().indexOf(filter) > -1) {
+            row.style.display = "";
+            found = true;
+          } else {
+            row.style.display = "none";
+          }
+        }
+        document.getElementById("no-results").style.display = found
+          ? "none"
+          : "";
+      }
+
+      async function openModal(mode, clienteId = null) {
+        form.reset();
+        if (mode === "add") {
+          modalTitle.textContent = "Adicionar Novo Cliente";
+          form.action = "{{ url_for('cliente_bp.adicionar_cliente') }}"; // Ação corrigida
+        } else if (mode === "edit" && clienteId) {
+          modalTitle.textContent = "Editar Cliente";
+          form.action = `/clientes/edit/${clienteId}`;
+          try {
+            const response = await fetch(`/clientes/${clienteId}`);
+            if (!response.ok) throw new Error("Cliente não encontrado");
+            const cliente = await response.json();
+            document.getElementById("nome").value = cliente.nome;
+            document.getElementById("endereco").value = cliente.endereco;
+            document.getElementById("cidade").value = cliente.cidade;
+            document.getElementById("uf").value = cliente.uf;
+            document.getElementById("cep").value = cliente.cep;
+          } catch (error) {
+            console.error("Erro ao buscar dados do cliente:", error);
+            alert("Não foi possível carregar os dados do cliente.");
+            return;
+          }
+        }
+        modal.classList.remove("hidden");
+        setTimeout(() => modalContent.classList.remove("modal-enter-from"), 10);
+      }
+
+      function closeModal() {
+        modalContent.classList.add("modal-enter-from");
+        setTimeout(() => modal.classList.add("hidden"), 200);
+      }
+
+      document.querySelectorAll(".alert-message").forEach((alert) => {
+        setTimeout(() => alert.remove(), 5000);
+      });
+    </script>
+  </body>
+</html>
