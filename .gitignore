@@ -1,0 +1,50 @@
+# Ambiente virtual
+venv/
+ENV/
+env/
+.venv/
+
+# Compilados Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Arquivos de log
+*.log
+
+# Configurações do sistema
+.DS_Store
+Thumbs.db
+
+# Banco de dados SQLite (se estiver usando para testes)
+*.sqlite3
+*.db
+
+# Arquivos de cache do Flask
+instance/
+*.pid
+
+# IDEs e editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Arquivos temporários
+*.bak
+*.swp
+*.tmp
+
+# Arquivos de exportação/dados temporários
+*.csv
+*.json
+*.xlsx
+
+# Arquivos de ambiente
+.env
+.env.*
+
+# Pastas de distribuição (se empacotar o projeto)
+build/
+dist/
+*.egg-info/
