@@ -10,7 +10,7 @@ class Venda(db.Model):
     _valor_vendido = db.Column('valor_vendido', db.Numeric(10, 2))
     _forma_pagamento = db.Column('forma_pagamento', db.String(40))
     
-    idplaca = db.Column(db.String(9), db.ForeignKey('veiculo.idplaca'), nullable=False, unique=True)
+    idplaca = db.Column(db.String(9), db.ForeignKey('veiculo.idplaca'), nullable=False)
     idcliente = db.Column(db.Integer, db.ForeignKey('cliente.idcliente'), nullable=False)
 
 

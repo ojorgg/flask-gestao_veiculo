@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, redirect
 
 
 from models import db
+from controllers.cliente_controller import ControleCliente
 
 def create_app():
+    
     app = Flask(__name__)
     
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:ifsp@localhost/gestao_veiculo'
@@ -15,6 +17,8 @@ def create_app():
 
     from routes.cliente_routes import cliente_bp
     app.register_blueprint(cliente_bp)
+    from routes.prestador_routes import prestador_bp
+    app.register_blueprint(prestador_bp)
     # --- Registro dos Blueprints (Rotas) ---
     # from routes.cliente_routes import cliente_bp
     # app.register_blueprint(cliente_bp)
@@ -33,7 +37,7 @@ def create_app():
     # --- Rota Principal (Página Inicial) ---
     @app.route('/')
     def home():
-        total_clientes = Cliente.query.count()
+        total_clientes = ControleCliente.count_cliente()
         stats = {
             'total_clientes': total_clientes,
             'veiculos_estoque': 15, # Exemplo

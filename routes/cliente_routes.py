@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-import controllers.cliente_controller as controller
+from controllers.cliente_controller import ControleCliente
 from models.cliente_model import Cliente
 
 cliente_bp = Blueprint("cliente_bp", __name__)
-
+controller = ControleCliente()
 
 @cliente_bp.route("/clientes")
 def listar_clientes():

@@ -6,6 +6,11 @@
     <title>Dashboard - Gestão de Veículos</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <link
       rel="stylesheet"
@@ -34,10 +39,13 @@
       <aside
         class="sidebar fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg md:relative md:translate-x-0"
       >
-        <div class="flex items-center justify-center p-6 border-b">
+        <a
+          href="{{ url_for('home') }}"
+          class="flex items-center justify-center p-6 border-b"
+        >
           <i class="fa-solid fa-car-side fa-2xl"></i>
           <h1 class="ml-3 text-2xl font-bold text-gray-800">AutoGestor</h1>
-        </div>
+        </a>
         <nav class="mt-6">
           <a
             href="{{ url_for('home') }}"
@@ -76,7 +84,7 @@
             Compras
           </a>
           <a
-            href="#"
+            href="{{ url_for('prestador_bp.listar_prestadores') }}"
             class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <i class="fa-solid fa-user-gear me-3"></i>
@@ -91,11 +99,33 @@
           </a>
         </nav>
       </aside>
+      <div
+        id="sidebar-overlay"
+        class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"
+      ></div>
 
       <main class="flex-1 flex flex-col">
         <header
           class="bg-white shadow-sm flex items-center justify-between md:justify-end p-4"
         >
+          <button
+            id="menu-button"
+            class="md:hidden text-gray-600 focus:outline-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="4" x2="20" y1="6" y2="6" />
+              <line x1="4" x2="20" y1="12" y2="12" />
+              <line x1="4" x2="20" y1="18" y2="18" />
+            </svg>
+          </button>
           <div class="flex items-center">
             <span class="text-sm font-semibold mr-3">Olá, Vilson</span>
             <img
@@ -255,9 +285,39 @@
     <script>
       const menuButton = document.getElementById("menu-button");
       const sidebar = document.querySelector(".sidebar");
+      // Adiciona o overlay ao script
+      const overlay = document.getElementById("sidebar-overlay");
 
-      menuButton.addEventListener("click", () => {
-        sidebar.classList.toggle("open");
+      function openSidebar() {
+        sidebar.classList.add("open");
+        overlay.classList.remove("hidden");
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+        overlay.classList.add("hidden");
+      }
+
+      // Lógica para abrir e fechar a sidebar
+      menuButton.addEventListener("click", (e) => {
+        e.stopPropagation(); // Impede que o clique no botão feche o menu imediatamente
+        if (sidebar.classList.contains("open")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+
+      // Lógica para fechar ao clicar no overlay
+      overlay.addEventListener("click", () => {
+        closeSidebar();
+      });
+
+      // Opcional: fechar com a tecla 'Esc'
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && sidebar.classList.contains("open")) {
+          closeSidebar();
+        }
       });
     </script>
   </body>

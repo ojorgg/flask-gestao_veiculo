@@ -11,6 +11,10 @@ class Cliente(db.Model):
     _cidade = db.Column("cidade", db.String(80), nullable=True)
     _uf = db.Column("uf", db.String(2), nullable=True)
     _cep = db.Column("cep", db.String(9), nullable=True)
+    
+    
+    vendas = db.relationship('Venda', backref='cliente', lazy=True, cascade="all, delete-orphan")
+    compras = db.relationship('Compra', backref='cliente', lazy=True, cascade="all, delete-orphan")
 
     @property
     def endereco(self):

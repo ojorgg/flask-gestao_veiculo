@@ -6,37 +6,26 @@
     <title>Gestão de Clientes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-
-    <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
-      html{
-        height: 100%;
-      }
       body {
         font-family: "Inter", sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
-
       .glass-card {
         background: rgba(255, 255, 255, 0.6);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.2);
       }
-
       .transition-all-fast {
         transition-property: all;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 150ms;
       }
-      /* modal */
       .modal-enter-active,
       .modal-exit-active {
         transition: opacity 200ms ease-out, transform 200ms ease-out;
@@ -51,7 +40,6 @@
         opacity: 1;
         transform: translateY(0) scale(1);
       }
-      /* Tabela com linhas "flutuantes" */
       #clientTable tbody tr {
         border-bottom: 8px solid transparent;
       }
@@ -64,27 +52,62 @@
     class="bg-gray-100 bg-gradient-to-br from-blue-50 via-gray-50 to-purple-50"
   >
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+      <!-- Cabeçalho da Página -->
       <div
         class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
       >
-        <div>
-          <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
-            Clientes
-          </h1>
-          <p class="mt-1 text-base text-gray-500">
-            Central de gerenciamento de clientes.
-          </p>
+        <div class="flex items-center space-x-4">
+          <a
+            href="{{ url_for('home') }}"
+            class="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-200/70 transition-all-fast"
+            title="Voltar ao Dashboard"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5"></path>
+              <path d="M12 19l-7-7 7-7"></path>
+            </svg>
+          </a>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">
+              Clientes
+            </h1>
+            <p class="mt-1 text-base text-gray-500">
+              Sua central de gerenciamento de clientes.
+            </p>
+          </div>
         </div>
         <button
           onclick="openModal('add')"
           class="mt-4 sm:mt-0 flex items-center bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold py-2.5 px-6 rounded-lg shadow-lg hover:shadow-blue-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:-translate-y-0.5 transition-all-fast"
         >
-          <i class="fa-solid fa-plus me-3"></i>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            class="mr-2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
           Adicionar Cliente
         </button>
       </div>
 
-      <!-- Alertas -->
+      <!-- O resto do arquivo continua igual -->
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}
       <div class="fixed top-5 right-5 z-50 space-y-3">
@@ -105,9 +128,7 @@
       </div>
       {% endif %} {% endwith %}
 
-      <!-- Card de Vidro -->
       <div class="glass-card rounded-xl shadow-lg">
-        <!-- Header do Card com a Barra de Pesquisa -->
         <div class="p-5 border-b border-white/20">
           <div class="relative">
             <div
@@ -136,7 +157,6 @@
           </div>
         </div>
 
-        <!-- Tabela de Clientes -->
         <div class="overflow-x-auto p-2">
           <table
             id="clientTable"
@@ -279,8 +299,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Modal para Adicionar/Editar Cliente (mantido) -->
     <div
       id="client-modal"
       class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 hidden z-40"
@@ -385,14 +403,11 @@
         </form>
       </div>
     </div>
-
     <script>
-      // O JavaScript continua o mesmo, sem necessidade de alterações.
       const modal = document.getElementById("client-modal");
       const modalContent = modal.querySelector("div");
       const modalTitle = document.getElementById("modal-title");
       const form = document.getElementById("client-form");
-
       function searchTable() {
         const input = document.getElementById("searchInput");
         const filter = input.value.toUpperCase();
@@ -400,18 +415,14 @@
         const tbody = table.querySelector("tbody");
         const tr = tbody.getElementsByTagName("tr");
         let found = false;
-
         for (let i = 0; i < tr.length; i++) {
           let row = tr[i];
           if (row.id === "no-results") continue;
-
           const cells = row.getElementsByTagName("td");
           let rowText = "";
           for (let j = 0; j < cells.length - 1; j++) {
-            // Pula Ações
             rowText += cells[j].textContent || cells[j].innerText;
           }
-
           if (rowText.toUpperCase().indexOf(filter) > -1) {
             row.style.display = "";
             found = true;
@@ -423,12 +434,11 @@
           ? "none"
           : "";
       }
-
       async function openModal(mode, clienteId = null) {
         form.reset();
         if (mode === "add") {
           modalTitle.textContent = "Adicionar Novo Cliente";
-          form.action = "{{ url_for('cliente_bp.adicionar_cliente') }}"; // Ação corrigida
+          form.action = "{{ url_for('cliente_bp.listar_clientes') }}";
         } else if (mode === "edit" && clienteId) {
           modalTitle.textContent = "Editar Cliente";
           form.action = `/clientes/edit/${clienteId}`;
@@ -450,12 +460,10 @@
         modal.classList.remove("hidden");
         setTimeout(() => modalContent.classList.remove("modal-enter-from"), 10);
       }
-
       function closeModal() {
         modalContent.classList.add("modal-enter-from");
         setTimeout(() => modal.classList.add("hidden"), 200);
       }
-
       document.querySelectorAll(".alert-message").forEach((alert) => {
         setTimeout(() => alert.remove(), 5000);
       });
